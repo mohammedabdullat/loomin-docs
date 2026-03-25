@@ -2,7 +2,7 @@
 
 This guide explains how to prepare the bootstrap package on an internet-connected machine and deploy Loomin-Docs on a clean RHEL 9 VM with no network access.
 
-## Prerequisites (Internet-Connected Machine)
+## Prerequisites - Already Completed (Internet-Connected Machine)
 
 You need a RHEL 9 (or compatible) machine with internet access to download:
 
