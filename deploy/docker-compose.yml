@@ -1,0 +1,68 @@
+# ═══════════════════════════════════════════════════════════════════
+# Loomin-Docs — Docker Compose Orchestration
+# Services: Frontend (nginx), Backend (FastAPI), Ollama (LLM)
+# ═══════════════════════════════════════════════════════════════════
+version: "3.8"
+
+services:
+  # ─── Frontend ───────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: loomin-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - loomin-net
+    restart: unless-stopped
+
+  # ─── Backend ────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: loomin-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - LOOMIN_DB_PATH=/app/data/loomin.db
+      - EMBEDDING_MODEL=all-MiniLM-L6-v2
+    volumes:
+      - backend-data:/app/data
+    depends_on:
+      - ollama
+    networks:
+      - loomin-net
+    restart: unless-stopped
+
+  # ─── Ollama ─────────────────────────────────────────────────────
+  ollama:
+    image: ollama/ollama:latest
+    container_name: loomin-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+    networks:
+      - loomin-net
+    restart: unless-stopped
+    # GPU pass-through (uncomment if NVIDIA GPU available):
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+volumes:
+  backend-data:
+  ollama-models:
+
+networks:
+  loomin-net:
+    driver: bridge
